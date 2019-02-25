@@ -1,0 +1,371 @@
+---
+
+- name: Load variables
+  hosts: localhost
+  tasks:
+
+    - name: Load variables
+      include_vars:
+        file: variables.yml
+      tags:
+        - always
+
+    - debug:
+        var: groups
+      tags:
+        - always
+
+    - debug:
+        var: distro
+
+- name: Set up server
+  hosts: localhost
+  connection: local
+  remote_user: "{{ image['user'] }}"
+  tasks:
+
+    - name: Provision OpenStack based server
+      include_role:
+        name: provision_openstack
+      when: provision_type == "openstack"
+
+# We need to wait for the server to become available _without_
+# gathering facts. Once it's available we can configure it in a second
+# step.
+- name: Wait for new server
+  hosts: ungrouped
+  remote_user: "{{ hostvars['localhost']['image']['user'] }}"
+  gather_facts: no
+  pre_tasks:
+    - name: Install Python
+      raw: sudo apt-get -y install python
+      when: hostvars['localhost']['image']['type'] == "Ubuntu"
+
+  tasks:
+    - name: Wait for server to become available (user "{{ hostvars['localhost']['image']['user'] }}")
+      wait_for_connection:
+        timeout: 1200
+      tags:
+        - create_server
+
+- name: Configure new server
+  hosts: ungrouped
+  vars:
+    - ARDANA_SITE: "{{ hostvars['localhost']['ARDANA_SITE'] }}"
+    - ARDANA_VAGRANT_VERSION: "{{ hostvars['localhost']['ARDANA_VAGRANT_VERSION'] }}"
+    - deployment_target: "{{ hostvars['localhost']['deployment_target'] }}"
+    - extra_device_name: "{{ hostvars['localhost']['extra_device_name'] | default('undefined') }}"
+    - git_user_email: "{{ hostvars['localhost']['git_user_email'] }}"
+    - git_user_name: "{{ hostvars['localhost']['git_user_name'] }}"
+    - image_type: "{{ hostvars['localhost']['image']['type'] }}"
+    - osa_repository: "{{ hostvars['localhost']['osa_repository'] }}"
+    - osa_tag: "{{ hostvars['localhost']['osa_tag'] }}"
+    - susedownload: "{{ hostvars['localhost']['susedownload'] }}"
+  remote_user: "{{ hostvars['localhost']['image']['user'] }}"
+  tasks:
+
+  - name: Add SUSE CA repository
+    become: yes
+    zypper_repository:
+      repo: http://download.suse.de/ibs/SUSE:/CA/openSUSE_Leap_42.3/
+      name: SUSE_CA
+      auto_import_keys: yes
+      runrefresh: yes
+    when: image_type == "SUSE"
+
+  - name: Refresh Zypper repositories
+    become: yes
+    zypper_repository:
+      repo: '*'
+      auto_import_keys: true
+      runrefresh: yes
+    when: image_type == "SUSE"
+
+  - name: Configure kvm-intel module
+    become: yes
+    blockinfile:
+      path: /etc/modprobe.d/99-kvm-intel.conf
+      block: options kvm-intel nested=Y
+      create: yes
+    register: kvm_module
+    tags:
+      - services
+
+  - name: Unload kvm-intel kernel module
+    become: yes
+    modprobe:
+      name: kvm-intel
+      state: absent
+    when: kvm_module is changed
+    tags:
+      - kvm-intel
+
+  - name: Reload kvm-intel kernel module
+    become: yes
+    modprobe:
+      name: kvm-intel
+      state: present
+      params: "nested=Y"
+    when: kvm_module is changed
+    tags:
+      - kvm-intel
+
+  - name: Remove gettext-runtime-mini
+    become: yes
+    shell: rpm --erase --nodeps gettext-runtime-mini
+    args:
+      warn: false
+    ignore_errors: yes
+    when: image_type == "SUSE"
+    tags:
+      - packages
+
+  - name: Install common packages
+    become: yes
+    package:
+      name:
+        - emacs-nox
+        - htop
+        - patch
+        - qemu-kvm
+        - tmux
+        - vim
+    tags:
+      - packages
+
+  - name: Install SUSE packages
+    become: yes
+    package:
+      name:
+        - ca-certificates-suse
+        - libguestfs
+        - libvirt
+        - libvirt-python
+        - vim-data
+    when: image_type == "SUSE"
+    tags:
+      - packages
+
+  - name: Install Ubuntu packages
+    become: yes
+    package:
+      name:
+        - libguestfs-tools
+        - libvirt-bin
+    when: image_type == "Ubuntu"
+    tags:
+      - packages
+
+  - name: Fix lvm filter rules
+    become: yes
+    vars:
+      cloud_string: '"r|/dev/mapper/cloud-|", "r|/dev/cloud/|", "r|/dev/disk/by-id/|", "r|/dev/dm-|",'
+    lineinfile:
+      path: /etc/lvm/lvm.conf
+      regexp: '([^#]*)filter\s*=\s*[[]\s*("r[|]/dev/mapper/cloud-[|]", "r[|]/dev/cloud/[|]", "r[|]/dev/disk/by-id/[|]", "r[|]/dev/dm-[|]",)*\s*(.*)\s*"a/[.][*]/"(\s*[]])\s*$'
+      line: '\1filter = [ {{ cloud_string }} \3"a/.*/" ]'
+      backrefs: yes
+    register: lvm_conf
+    tags:
+      - mkcloud
+
+  - name: "Create cloud volume group for mkcloud on {{ extra_device_name }}"
+    become: yes
+    lvg:
+      pvs: "{{ extra_device_name }}"
+      vg: cloud
+    when: deployment_target == "Crowbar"
+    tags:
+      - mkcloud
+
+  - name: Check user opensuse
+    become: yes
+    user:
+      name: opensuse
+      shell: /bin/bash
+
+  - name: Copy configuration files
+    become: yes
+    copy:
+      src: "{{ item[0].src }}"
+      dest: "{{ item[1].destdir }}/{{ item[0].dest }}"
+      owner: "{{ item[1].owner }}"
+    tags:
+      - editors
+    with_nested:
+      -
+        - src: emacs.el
+          dest: .emacs
+        - src: screenrc
+          dest: .screenrc
+        - src: jobs-2nodes.sh
+          dest: jobs-2nodes.sh
+      -
+        - destdir: /root
+          owner: root
+        - destdir: /home/opensuse
+          owner: opensuse
+
+  - name: Configure bash
+    become: yes
+    template:
+      src: suse-bashrc.j2
+      dest: "{{ item.dest }}/.bashrc"
+      owner: "{{ item.owner }}"
+    tags:
+      - shell
+    with_items:
+      - dest: /root
+        owner: root
+      - dest: /home/opensuse
+        owner: opensuse
+
+  - name: Start services
+    become: yes
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - libvirtd
+      - virtlockd
+      - virtlogd
+    tags:
+      - services
+
+  - name: Add opensuse user to correct groups
+    become: yes
+    user:
+      name: opensuse
+      append: yes
+      groups:
+        - kvm
+        - libvirt
+    when: image_type == "SUSE"
+    tags:
+      - user_groups
+
+  - name: Configure git for normal user
+    git_config:
+      scope: global
+      name: "{{ item.key }}"
+      value: "{{ item.value }}"
+    with_dict:
+      user.name: "{{ git_user_name }}"
+      user.email: "{{ git_user_email }}"
+    tags:
+      - configure_git
+
+  - name: Configure git for root user
+    become: yes
+    git_config:
+      scope: global
+      name: "{{ item.key }}"
+      value: "{{ item.value }}"
+    with_dict:
+      user.name: "{{ git_user_name }}"
+      user.email: "{{ git_user_email }}"
+    tags:
+      - configure_git
+
+  - name: Clone dev tools
+    git:
+      clone: yes
+      dest: ardana-dev-tools
+      repo: https://git.suse.provo.cloud/ardana/ardana-dev-tools
+      force: yes
+      update: yes
+      version: master
+    register: dev_tools
+    when:
+      - deployment_target == "Ardana"
+      - image_type == "SUSE"
+    tags:
+      - clone
+
+  - name: Reset and clean dev tools so we can apply the patches
+    shell: git reset --hard && git clean -dfx
+    args:
+      chdir: ardana-dev-tools
+    when:
+      - deployment_target == "Ardana"
+      - image_type == "SUSE"
+    tags:
+      - clone
+
+  - name: Patch dev tools
+    patch:
+      src: "{{ item }}"
+      remote_src: no
+      basedir: ardana-dev-tools
+      strip: 1
+    with_items:
+      - 0001-SCRD-5556-Disable-Spectre-v2-retpoline-mitigation.patch
+      - 0001-SCRD-5556-Make-path-discovery-consistent.patch
+    when:
+      - deployment_target == "Ardana"
+      - image_type == "SUSE"
+    tags:
+      - clone
+
+  - name: Clone automation
+    git:
+      clone: yes
+      dest: automation
+      repo: https://github.com/SUSE-Cloud/automation
+      update: yes
+      force: yes
+      version: master
+    when:
+      - deployment_target == "Crowbar"
+      - image_type == "SUSE"
+    tags:
+      - clone
+
+  - name: Reset and clean automation so we can apply the patches
+    shell: git reset --hard && git clean -dfx
+    args:
+      chdir: automation
+    when:
+      - deployment_target == "Crowbar"
+      - image_type == "SUSE"
+    tags:
+      - clone
+
+  - name: Patch automation
+    patch:
+      src: "{{ item }}"
+      remote_src: no
+      basedir: automation
+      strip: 1
+    with_items:
+      - 0001-Relax-CPU-model.patch
+    when:
+      - deployment_target == "Crowbar"
+      - image_type == "SUSE"
+    tags:
+      - clone
+
+  - name: Clone openstack-ansible repository
+    become: yes
+    git:
+      clone: yes
+      dest: /opt/openstack-ansible
+      repo: "{{ osa_repository }}"
+      update: yes
+      force: yes
+      version: "{{ osa_tag }}"
+    when:
+      - deployment_target == "OSA"
+    tags:
+      - clone
+
+  - name: Reset and clean openstack-ansible repository so we can apply the patches
+    become: yes
+    shell: git reset --hard && git clean -dfx
+    args:
+      chdir: /opt/openstack-ansible
+    when:
+      - deployment_target == "OSA"
+    tags:
+      - clone

@@ -1,0 +1,89 @@
+---
+
+- name: "Create network {{ network_name }}"
+  os_network:
+    name: "{{ network_name }}"
+  register: network
+  tags:
+    - create_server
+
+- name: "Create IPv4 subnet {{ subnet_ipv4 }}"
+  os_subnet:
+    cidr: "{{ cidr_ipv4 }}"
+    ip_version: 4
+    name: "{{ subnet_ipv4 }}"
+    network_name: "{{ network.id }}"
+  register: subnet_ipv4
+
+- name: "Create IPv6 subnet {{ subnet_ipv6 }}"
+  os_subnet:
+    cidr: "{{ cidr_ipv6 }}"
+    ip_version: 6
+    ipv6_address_mode: slaac
+    ipv6_ra_mode: slaac
+    name: "{{ subnet_ipv6 }}"
+    network_name: "{{ network.id }}"
+  register: subnet_ipv6
+  when: want_ipv6
+
+- name: "Create router {{ router_name }}"
+  os_router:
+    name: "{{ router_name }}"
+    network: floating
+    interfaces: "{{ [subnet_ipv4.id] + (want_ipv6) | ternary([subnet_ipv6.id], []) }}"
+
+- name: "Create server volume {{ server_name }}-volume"
+  os_volume:
+    display_name: "{{ server_name }}-volume"
+    image: "{{ image['image'] }}"
+    size: 120
+  register: boot_volume
+  tags:
+    - create_server
+
+- name: "Create extra volume {{ server_name }}-extra"
+  os_volume:
+    display_name: "{{ server_name }}-extra"
+    size: 120
+  register: extra_volume
+  when: deployment_target == "Crowbar"
+  tags:
+    - create_server
+
+- name: "Create server {{ server_name }}"
+  os_server:
+    name: "{{ server_name }}"
+    network: "{{ network.id }}"
+    flavor: "{{ server_flavor }}"
+    boot_volume: "{{ boot_volume.id }}"
+    volumes: "{{ (deployment_target == 'Crowbar') | ternary([extra_volume.id], []) }}"
+    key_name: "{{ key_name }}"
+    security_groups:
+      - default
+      - ping/ssh
+  retries: 3
+  delay: 5
+  register: server
+  tags:
+    - create_server
+
+- name: Set device name for extra volume
+  set_fact:
+    extra_device_name: "{{ item.device }}"
+  with_items: "{{ server.openstack.volumes }}"
+  when:
+    - deployment_target == "Crowbar"
+    - item.id == extra_volume.id
+
+- name: Add server to inventory
+  add_host:
+    groups: ungrouped
+    name: "{{ server.openstack.accessIPv4 }}"
+    ansible_ssh_common_args: "-q -o StrictHostKeyChecking=no"
+  tags:
+    - create_server
+
+- name: Invalidate any ssh hostkey related to the new server
+  shell: ssh-keygen -R "{{ server.openstack.accessIPv4 }}"
+  tags:
+    - create_server

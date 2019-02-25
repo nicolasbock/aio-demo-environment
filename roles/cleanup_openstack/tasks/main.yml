@@ -1,0 +1,43 @@
+---
+
+- name: "Delete server {{ server_name }}"
+  os_server:
+    name: "{{ server_name }}"
+    state: absent
+  register: server
+
+- name: "Delete volume {{ server_name }}-volume"
+  os_volume:
+    display_name: "{{ server_name }}-volume"
+    state: absent
+    wait: no
+
+- name: "Delete extra volume {{ server_name }}-extra"
+  os_volume:
+    display_name: "{{ server_name }}-extra"
+    state: absent
+    wait: no
+
+- name: Delete router "{{ router_name }}"
+  os_router:
+    name: "{{ router_name }}"
+    state: absent
+    wait: no
+
+- name: Delete IPv6 subnet "{{ subnet_ipv6 }}"
+  os_subnet:
+    name: "{{ subnet_ipv6 }}"
+    state: absent
+    wait: no
+
+- name: Delete IPv4 subnet "{{ subnet_ipv4 }}"
+  os_subnet:
+    name: "{{ subnet_ipv4 }}"
+    state: absent
+    wait: no
+
+- name: Delete network "{{ network_name }}"
+  os_network:
+    name: "{{ network_name }}"
+    state: absent
+    wait: no

@@ -1,0 +1,29 @@
+From c297153996de9e98baccca97bd6398c729609a2c Mon Sep 17 00:00:00 2001
+From: Nicolas Bock <nicolas.bock@suse.com>
+Date: Wed, 12 Dec 2018 10:03:09 -0700
+Subject: [PATCH] SCRD-5556 Make path discovery consistent
+
+The path discovery usually uses a combination of `readlink` and
+`dirname`.
+
+Change-Id: I2a21aada1b65cf0caac6f55f1c197d2407a07d54
+---
+ bin/libci.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bin/libci.sh b/bin/libci.sh
+index 0962659..cc17d72 100644
+--- a/bin/libci.sh
++++ b/bin/libci.sh
+@@ -14,7 +14,7 @@
+ # License for the specific language governing permissions and limitations
+ # under the License.
+ #
+-export DEVTOOLS=$(cd $(dirname ${BASH_SOURCE[0]})/.. ; pwd)
++export DEVTOOLS=$(readlink -e "$(dirname ${BASH_SOURCE[0]})/..")
+ export DEVROOT=$(readlink -e ${DEVTOOLS}/..)
+ export LOGSROOT="${WORKSPACE:-${DEVROOT}}/logs"
+ export ARDANA_OSC_CACHE="${HOME}/.cache/ardana-osc"
+-- 
+2.19.2
+

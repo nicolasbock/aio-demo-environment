@@ -1,0 +1,25 @@
+From 9c2cb203e74afc18373947526314f61de6180b59 Mon Sep 17 00:00:00 2001
+From: Nicolas Bock <nicolas.bock@suse.com>
+Date: Thu, 20 Dec 2018 17:44:25 +0000
+Subject: [PATCH] Relax CPU model
+
+---
+ scripts/lib/libvirt/templates/cpu-intel.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/lib/libvirt/templates/cpu-intel.xml b/scripts/lib/libvirt/templates/cpu-intel.xml
+index 05e239bb..c1ac6bbf 100644
+--- a/scripts/lib/libvirt/templates/cpu-intel.xml
++++ b/scripts/lib/libvirt/templates/cpu-intel.xml
+@@ -4,7 +4,7 @@
+     <pae/>
+   </features>
+   <cpu mode='custom' match='exact'>
+-    <model fallback='allow'>Haswell-noTSX</model>
++    <model fallback='allow'>kvm64</model>
+     <feature policy='require' name='vmx'/>
+     <feature policy='disable' name='monitor'/>
+   </cpu>
+-- 
+2.16.4
+

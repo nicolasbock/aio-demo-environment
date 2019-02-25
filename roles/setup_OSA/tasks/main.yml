@@ -1,0 +1,42 @@
+---
+
+- name: Clone openstack-ansible repository
+  become: yes
+  git:
+    clone: yes
+    dest: /opt/openstack-ansible
+    repo: "{{ osa_repository }}"
+    update: yes
+    force: yes
+    version: "{{ osa_tag }}"
+  when:
+    - deployment_target == "OSA"
+  tags:
+    - clone
+
+- name: Reset and clean openstack-ansible repository so we can apply the patches
+  become: yes
+  shell: git reset --hard && git clean -dfx
+  args:
+    chdir: /opt/openstack-ansible
+  when:
+    - deployment_target == "OSA"
+  tags:
+    - clone
+
+- name: Bootstrap AIO
+  become: yes
+  shell: ./scripts/bootstrap-aio.sh
+  args:
+    chdir: "{{ osa_repodir }}"
+    executable: /bin/bash
+  environment:
+    PATH: "/usr/local/bin:{{ lookup('env', 'PATH') }}"
+    SCENARIO: "octavia"
+  register: bootstrap_aio
+  until: bootstrap_aio is succeeded
+  retries: 1
+  async: 1200
+  poll: 10
+  tags:
+    - bootstrap_aio

@@ -359,26 +359,7 @@
     tags:
       - clone
 
-  - name: Clone openstack-ansible repository
-    become: yes
-    git:
-      clone: yes
-      dest: /opt/openstack-ansible
-      repo: "{{ osa_repository }}"
-      update: yes
-      force: yes
-      version: "{{ osa_tag }}"
-    when:
-      - deployment_target == "OSA"
-    tags:
-      - clone
-
-  - name: Reset and clean openstack-ansible repository so we can apply the patches
-    become: yes
-    shell: git reset --hard && git clean -dfx
-    args:
-      chdir: /opt/openstack-ansible
-    when:
-      - deployment_target == "OSA"
-    tags:
-      - clone
+  - name: Setup openstack-ansible
+    include_role:
+      name: setup_OSA
+    when: deployment_target == "OSA"

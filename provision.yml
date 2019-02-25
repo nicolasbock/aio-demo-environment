@@ -132,6 +132,7 @@
     package:
       name:
         - emacs-nox
+        - hatop
         - htop
         - patch
         - qemu-kvm
@@ -145,6 +146,7 @@
     package:
       name:
         - ca-certificates-suse
+        - emacs-el
         - libguestfs
         - libvirt
         - libvirt-python
@@ -207,6 +209,10 @@
           dest: .screenrc
         - src: jobs-2nodes.sh
           dest: jobs-2nodes.sh
+        - src: alias
+          dest: .alias
+        - src: start-workshop.sh
+          dest: start-workshop.sh
       -
         - destdir: /root
           owner: root

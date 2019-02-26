@@ -58,7 +58,7 @@ osa_repository: https://github.com/nicolasbock/openstack-ansible.git
 # osa_tag: master
 # osa_tag: ipv6
 # osa_tag: workshop_beginner
-OSA_tag: workshop_advanced
+osa_tag: workshop_advanced
 
 server_flavor: m8.xlarge # 32768 RAM, 40 Disk, 20 Ephemeral, 8 vCPUs
 #server_flavor: m1.xlarge # 8192 RAM, 80 Disk, 0 Ephemeral, 4 vCPUs

@@ -57,6 +57,22 @@
   tags:
     - setup_osa
     - bootstrap_aio
+
+- name: Update user variables
+  become: yes
+  template:
+    dest: "/etc/openstack_deploy/{{ item }}"
+    src: "{{ item }}.j2"
+  with_items:
+    - user_variables_designate.yml
+    - user_variables_neutron.yml
+    - user_variables_nova.yml
+    - user_variables_octavia.yml
+    - user_variables_workshop.yml
+  tags:
+    - setup_osa
+    - user_variables
+
 - name: Add services
   become: yes
   shell: |

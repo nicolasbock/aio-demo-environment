@@ -1,0 +1,8 @@
+---
+
+neutron_plugin_type: ml2.ovs
+neutron_designate_enabled: true
+neutron_dns_domain: example.org.
+neutron_ml2_conf_ini_overrides:
+  ml2:
+    extension_drivers: port_security,dns_domain_ports

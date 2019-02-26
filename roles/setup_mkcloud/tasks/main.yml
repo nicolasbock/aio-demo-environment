@@ -1,0 +1,46 @@
+---
+
+- name: Load variables
+  include_vars:
+    file: variables.yml
+  tags:
+    - always
+
+- name: Clone automation
+  git:
+    clone: yes
+    dest: automation
+    repo: https://github.com/SUSE-Cloud/automation
+    update: yes
+    force: yes
+    version: master
+  when:
+    - deployment_target == "Crowbar"
+    - image_type == "SUSE"
+  tags:
+    - clone
+
+- name: Reset and clean automation so we can apply the patches
+  shell: git reset --hard && git clean -dfx
+  args:
+    chdir: automation
+  when:
+    - deployment_target == "Crowbar"
+    - image_type == "SUSE"
+  tags:
+    - clone
+
+- name: Patch automation
+  patch:
+    src: "{{ item }}"
+    remote_src: no
+    basedir: automation
+    strip: 1
+  with_items:
+    - 0001-Relax-CPU-model.patch
+  when:
+    - deployment_target == "Crowbar"
+    - image_type == "SUSE"
+  tags:
+    - clone
+

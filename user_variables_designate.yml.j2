@@ -1,0 +1,34 @@
+---
+
+designate_pools_yaml:
+  - name: "default"
+    description: Default BIND9 Pool
+    attributes: {}
+    ns_records:
+      - hostname: ns1.example.org.
+        priority: 1
+    nameservers:
+      - host: 127.0.0.1
+        port: 53
+    targets:
+      - type: bind9
+        description: BIND9 Server
+        masters:
+          - host: 127.0.0.1
+            port: 5354
+        options:
+          host: 127.0.0.1
+          port: 53
+          rndc_host: 127.0.0.1
+          rndc_port: 953
+
+designate_designate_conf_overrides:
+  "backend:agent:bind9":
+    rndc_host: 127.0.0.1
+    rndc_port: 953
+    rndc_config_file: /etc/rndc.conf
+    rndc_key_file: /etc/rndc.key
+    zone_file_path: $state_path/zones
+    query_destination: 127.0.0.1
+  DEFAULT:
+    log_file: /var/log/designate/designate.log

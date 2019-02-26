@@ -1,0 +1,45 @@
+---
+
+- name: Load variables
+  include_vars:
+    file: variables.yml
+  tags:
+    - always
+
+- name: Clone dev tools
+  git:
+    clone: yes
+    dest: ardana-dev-tools
+    repo: https://git.suse.provo.cloud/ardana/ardana-dev-tools
+    force: yes
+    update: yes
+    version: master
+  register: dev_tools
+  when:
+    - image_type == "SUSE"
+  tags:
+    - clone
+
+- name: Reset and clean dev tools so we can apply the patches
+  shell: git reset --hard && git clean -dfx
+  args:
+    chdir: ardana-dev-tools
+  when:
+    - image_type == "SUSE"
+  tags:
+    - clone
+
+- name: Patch dev tools
+  patch:
+    src: "{{ item }}"
+    remote_src: no
+    basedir: ardana-dev-tools
+    strip: 1
+  with_items:
+    - 0001-SCRD-5556-Disable-Spectre-v2-retpoline-mitigation.patch
+    - 0001-SCRD-5556-Make-path-discovery-consistent.patch
+  when:
+    - image_type == "SUSE"
+  tags:
+    - clone
+

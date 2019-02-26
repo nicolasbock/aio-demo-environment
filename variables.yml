@@ -61,6 +61,17 @@ osa_repodir: /opt/openstack-ansible
 # osa_tag: workshop_beginner
 osa_tag: workshop_advanced
 
+osa_services:
+  - cinder
+  - designate
+  - glance
+  - haproxy
+  - keystone
+  - neutron
+  - nova
+  - octavia
+  - swift
+
 server_flavor: m8.xlarge # 32768 RAM, 40 Disk, 20 Ephemeral, 8 vCPUs
 #server_flavor: m1.xlarge # 8192 RAM, 80 Disk, 0 Ephemeral, 4 vCPUs
 #server_flavor: m2.medium # 6144 RAM, 20 Disk, 0 Ephemeral, 2 vCPUs

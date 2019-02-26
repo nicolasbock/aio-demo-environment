@@ -57,3 +57,16 @@
   tags:
     - setup_osa
     - bootstrap_aio
+- name: Add services
+  become: yes
+  shell: |
+    cp -v \
+      "{{ osa_repodir }}/etc/openstack_deploy/conf.d/{{ item }}.yml.aio" \
+      "/etc/openstack_deploy/conf.d/{{ item }}.yml"
+  args:
+    creates: "/etc/openstack_deploy/conf.d/{{ item }}.yml"
+  with_items: "{{ osa_services }}"
+  tags:
+    - setup_osa
+    - osa_services
+

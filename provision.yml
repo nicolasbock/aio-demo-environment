@@ -273,83 +273,21 @@
       tags:
         - configure_git
 
-    - name: Clone dev tools
-      git:
-        clone: yes
-        dest: ardana-dev-tools
-        repo: https://git.suse.provo.cloud/ardana/ardana-dev-tools
-        force: yes
-        update: yes
-        version: master
-      register: dev_tools
-      when:
-        - deployment_target == "Ardana"
-        - image_type == "SUSE"
+    - name: Setup astack
+      include_role:
+        name: setup_astack
+        public: yes
+      when: deployment_target == "Ardana"
       tags:
-        - clone
+        - setup_astack
 
-    - name: Reset and clean dev tools so we can apply the patches
-      shell: git reset --hard && git clean -dfx
-      args:
-        chdir: ardana-dev-tools
-      when:
-        - deployment_target == "Ardana"
-        - image_type == "SUSE"
+    - name: Setup mkcloud
+      include_role:
+        name: setup_mkcloud
+        public: yes
+      when: deployment_target == "Crowbar"
       tags:
-        - clone
-
-    - name: Patch dev tools
-      patch:
-        src: "{{ item }}"
-        remote_src: no
-        basedir: ardana-dev-tools
-        strip: 1
-      with_items:
-        - 0001-SCRD-5556-Disable-Spectre-v2-retpoline-mitigation.patch
-        - 0001-SCRD-5556-Make-path-discovery-consistent.patch
-      when:
-        - deployment_target == "Ardana"
-        - image_type == "SUSE"
-      tags:
-        - clone
-
-    - name: Clone automation
-      git:
-        clone: yes
-        dest: automation
-        repo: https://github.com/SUSE-Cloud/automation
-        update: yes
-        force: yes
-        version: master
-      when:
-        - deployment_target == "Crowbar"
-        - image_type == "SUSE"
-      tags:
-        - clone
-
-    - name: Reset and clean automation so we can apply the patches
-      shell: git reset --hard && git clean -dfx
-      args:
-        chdir: automation
-      when:
-        - deployment_target == "Crowbar"
-        - image_type == "SUSE"
-      tags:
-        - clone
-
-    - name: Patch automation
-      patch:
-        src: "{{ item }}"
-        remote_src: no
-        basedir: automation
-        strip: 1
-      with_items:
-        - 0001-Relax-CPU-model.patch
-      when:
-        - deployment_target == "Crowbar"
-        - image_type == "SUSE"
-      tags:
-        - clone
+        - setup_mkcloud
 
     - name: Setup openstack-ansible
       include_role:

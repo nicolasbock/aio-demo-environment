@@ -199,8 +199,6 @@
             dest: .emacs
           - src: screenrc
             dest: .screenrc
-          - src: jobs-2nodes.sh
-            dest: jobs-2nodes.sh
           - src: alias
             dest: .alias
           - src: start-workshop.sh
@@ -210,6 +208,23 @@
             owner: root
           - destdir: /home/opensuse
             owner: opensuse
+
+    - name: Copy workshop files
+      become: yes
+      copy:
+        src: "{{ item[0].src }}"
+        dest: "{{ item[1].destdir }}/{{ item[0].dest }}"
+        owner: "{{ item[1].owner }}"
+      with_nested:
+        -
+          - src: start-workshop.sh
+            dest: start-workshop.sh
+        -
+          - destdir: /root
+            owner: root
+          - destdir: /home/opensuse
+            owner: opensuse
+      when: deployment_target == "OSA"
 
     - name: Configure bash
       become: yes

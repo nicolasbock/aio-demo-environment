@@ -28,7 +28,8 @@
 
 - name: Bootstrap ansible
   become: yes
-  command: ./scripts/bootstrap-ansible.sh
+  shell: |
+    ./scripts/bootstrap-ansible.sh 2>&1 | tee /root/bootstrap-ansible.output
   args:
     chdir: "{{ osa_repodir }}"
   register: bootstrap_ansible
@@ -42,7 +43,8 @@
 
 - name: Bootstrap AIO
   become: yes
-  shell: ./scripts/bootstrap-aio.sh
+  shell: |
+    ./scripts/bootstrap-aio.sh 2>&1 | tee /root/bootstrap-ansible.output
   args:
     chdir: "{{ osa_repodir }}"
     executable: /bin/bash
@@ -89,7 +91,7 @@
 - name: AIO setup-hosts
   become: yes
   shell: |
-    openstack-ansible setup-hosts.yml
+    openstack-ansible setup-hosts.yml 2>&1 | tee /root/setup-hosts.output
   args:
     chdir: "{{ osa_repodir }}/playbooks"
     executable: /bin/bash
@@ -108,7 +110,7 @@
 - name: AIO setup-infrastructure
   become: yes
   shell: |
-    openstack-ansible setup-infrastructure.yml
+    openstack-ansible setup-infrastructure.yml 2>&1 | tee /root/setup-infrastructure.output
   args:
     chdir: "{{ osa_repodir }}/playbooks"
     executable: /bin/bash
@@ -127,7 +129,7 @@
 - name: AIO setup-openstack
   become: yes
   shell: |
-    openstack-ansible setup-openstack.yml
+    openstack-ansible setup-openstack.yml 2>&1 | tee /root/setup-openstack.output
   args:
     chdir: "{{ osa_repodir }}/playbooks"
     executable: /bin/bash

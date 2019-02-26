@@ -1,10 +1,16 @@
 ---
 
+- name: Load variables
+  include_vars:
+    file: variables.yml
+  tags:
+    - always
+
 - name: Clone openstack-ansible repository
   become: yes
   git:
     clone: yes
-    dest: /opt/openstack-ansible
+    dest: "{{ osa_repodir }}"
     repo: "{{ osa_repository }}"
     update: yes
     force: yes
@@ -18,7 +24,7 @@
   become: yes
   shell: git reset --hard && git clean -dfx
   args:
-    chdir: /opt/openstack-ansible
+    chdir: "{{ osa_repodir }}"
   when:
     - deployment_target == "OSA"
   tags:

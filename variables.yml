@@ -52,6 +52,7 @@ key_name: nbock
 
 # osa_repository: https://git.openstack.org/openstack/openstack-ansible.git
 osa_repository: https://github.com/nicolasbock/openstack-ansible.git
+osa_repodir: /opt/openstack-ansible
 
 # osa_tag: 17.1.6 # Queens
 # osa_tag: 18.1.2 # Rocky

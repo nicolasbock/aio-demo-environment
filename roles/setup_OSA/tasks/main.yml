@@ -86,3 +86,60 @@
     - setup_osa
     - osa_services
 
+- name: AIO setup-hosts
+  become: yes
+  shell: |
+    openstack-ansible setup-hosts.yml
+  args:
+    chdir: "{{ osa_repodir }}/playbooks"
+    executable: /bin/bash
+  environment:
+    PATH: "/usr/local/bin:{{ lookup('env', 'PATH') }}"
+    ANSIBLE_STDOUT_CALLBACK: "debug"
+  register: aio_setup_hosts
+  until: aio_setup_hosts is succeeded
+  retries: 1
+  async: "{{ 2 * 3600 }}"
+  poll: 60
+  tags:
+    - aio_setup
+    - aio_setup_hosts
+
+- name: AIO setup-infrastructure
+  become: yes
+  shell: |
+    openstack-ansible setup-infrastructure.yml
+  args:
+    chdir: "{{ osa_repodir }}/playbooks"
+    executable: /bin/bash
+  environment:
+    PATH: "/usr/local/bin:{{ lookup('env', 'PATH') }}"
+    ANSIBLE_STDOUT_CALLBACK: "debug"
+  register: aio_setup_infrastructure
+  until: aio_setup_infrastructure is succeeded
+  retries: 1
+  async: "{{ 2 * 3600 }}"
+  poll: 60
+  tags:
+    - aio_setup
+    - aio_setup_infrastructure
+
+- name: AIO setup-openstack
+  become: yes
+  shell: |
+    openstack-ansible setup-openstack.yml
+  args:
+    chdir: "{{ osa_repodir }}/playbooks"
+    executable: /bin/bash
+  environment:
+    PATH: "/usr/local/bin:{{ lookup('env', 'PATH') }}"
+    ANSIBLE_STDOUT_CALLBACK: "debug"
+  register: aio_setup_openstack
+  until: aio_setup_openstack is succeeded
+  retries: 1
+  async: "{{ 2 * 3600 }}"
+  poll: 60
+  tags:
+    - aio_setup
+    - aio_setup_openstack
+

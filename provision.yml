@@ -310,4 +310,6 @@
         public: yes
       when: deployment_target == "OSA"
       tags:
+        - aio_setup
+        - osa_services
         - setup_osa

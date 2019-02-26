@@ -4,6 +4,12 @@
   hosts: localhost
   tasks:
 
+    - name: Load constants
+      include_vars:
+        file: constants.yml
+      tags:
+        - always
+
     - name: Load variables
       include_vars:
         file: variables.yml
@@ -44,6 +50,12 @@
   hosts: ungrouped
   remote_user: "{{ hostvars['localhost']['image']['user'] }}"
   tasks:
+
+    - name: Load constants
+      include_vars:
+        file: constants.yml
+      tags:
+        - always
 
     - name: Load variables
       include_vars:

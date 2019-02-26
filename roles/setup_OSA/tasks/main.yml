@@ -1,5 +1,11 @@
 ---
 
+- name: Load constants
+  include_vars:
+    file: constants.yml
+  tags:
+    - always
+
 - name: Load variables
   include_vars:
     file: variables.yml

@@ -1,0 +1,34 @@
+---
+
+ARDANA_VAGRANT_VERSION: 1.8.7
+ARDANA_SITE: provo
+susedownload: ibs-mirror.prv.suse.net
+
+images:
+  SP3:
+    image: SLES12-SP3-JeOS.x86_64
+    user: root
+    type: SUSE
+  SP4:
+    image: SLES12-SP4-JeOS.x86_64-12.4
+    user: sles
+    type: SUSE
+  Leap_42.3:
+    image: openSUSE-Leap-42.3-OpenStack.x86_64
+    user: opensuse
+    type: SUSE
+  Leap_15.0:
+    image: openSUSE-Leap-15.0-OpenStack.x86_64
+    user: root
+    type: SUSE
+  Xenial:
+    image: 4d6a9155-e626-4f03-a0bd-fd92e79575f6
+    user: ubuntu
+    type: Ubuntu
+
+git_user_name: "Nicolas Bock"
+git_user_email: "nicolas.bock@suse.com"
+
+# osa_repository: https://git.openstack.org/openstack/openstack-ansible.git
+osa_repository: https://github.com/nicolasbock/openstack-ansible.git
+osa_repodir: /opt/openstack-ansible

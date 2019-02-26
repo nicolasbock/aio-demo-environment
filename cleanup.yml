@@ -6,13 +6,19 @@
   remote_user: opensuse
   tasks:
 
-  - name: Load variables
-    include_vars:
-      file: variables.yml
-    tags:
-      - always
+    - name: Load constants
+      include_vars:
+        file: constants.yml
+      tags:
+        - always
 
-  - name: Delete OpenStack based server
-    include_role:
-      name: cleanup_openstack
-    when: provision_type == "openstack"
+    - name: Load variables
+      include_vars:
+        file: variables.yml
+      tags:
+        - always
+
+    - name: Delete OpenStack based server
+      include_role:
+        name: cleanup_openstack
+      when: provision_type == "openstack"

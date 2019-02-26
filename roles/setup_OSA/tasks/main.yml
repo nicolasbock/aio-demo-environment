@@ -143,3 +143,16 @@
     - aio_setup
     - aio_setup_openstack
 
+- name: Disable apparmor for haproxy
+  become: yes
+  shell: aa-disable haproxy
+  tags:
+    - aio_postsetup
+
+- name: Make swap persistent
+  become: yes
+  lineinfile:
+    path: /etc/fstab
+    line: /openstack/swap.img none swap sw 0 0
+  tags:
+    - aio_postsetup

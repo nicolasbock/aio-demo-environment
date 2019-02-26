@@ -50,7 +50,7 @@
 - name: Bootstrap AIO
   become: yes
   shell: |
-    ./scripts/bootstrap-aio.sh 2>&1 | tee /root/bootstrap-ansible.output
+    ./scripts/bootstrap-aio.sh 2>&1 | tee /root/bootstrap-aio.output
   args:
     chdir: "{{ osa_repodir }}"
     executable: /bin/bash

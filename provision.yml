@@ -203,18 +203,23 @@
         src: "{{ item[0].src }}"
         dest: "{{ item[1].destdir }}/{{ item[0].dest }}"
         owner: "{{ item[1].owner }}"
+        mode: "{{ item[0].mode }}"
       tags:
         - editors
       with_nested:
         -
           - src: emacs.el
             dest: .emacs
+            mode: 0644
           - src: screenrc
             dest: .screenrc
+            mode: 0644
           - src: alias
             dest: .alias
+            mode: 0644
           - src: start-workshop.sh
             dest: start-workshop.sh
+            mode: 0755
         -
           - destdir: /root
             owner: root
@@ -227,10 +232,12 @@
         src: "{{ item[0].src }}"
         dest: "{{ item[1].destdir }}/{{ item[0].dest }}"
         owner: "{{ item[1].owner }}"
+        mode: "{{ item[0].mode }}"
       with_nested:
         -
           - src: start-workshop.sh
             dest: start-workshop.sh
+            mode: 0755
         -
           - destdir: /root
             owner: root

@@ -210,16 +210,16 @@
         -
           - src: emacs.el
             dest: .emacs
-            mode: 0644
+            mode: '0644'
           - src: screenrc
             dest: .screenrc
-            mode: 0644
+            mode: '0644'
           - src: alias
             dest: .alias
-            mode: 0644
+            mode: '0644'
           - src: start-workshop.sh
             dest: start-workshop.sh
-            mode: 0755
+            mode: '0755'
         -
           - destdir: /root
             owner: root
@@ -237,7 +237,7 @@
         -
           - src: start-workshop.sh
             dest: start-workshop.sh
-            mode: 0755
+            mode: '0755'
         -
           - destdir: /root
             owner: root

@@ -109,7 +109,7 @@
     ANSIBLE_STDOUT_CALLBACK: "debug"
   register: aio_setup_hosts
   until: aio_setup_hosts is succeeded
-  retries: 1
+  retries: 2
   async: "{{ 2 * 3600 }}"
   poll: 60
   tags:
@@ -129,7 +129,7 @@
     ANSIBLE_STDOUT_CALLBACK: "debug"
   register: aio_setup_infrastructure
   until: aio_setup_infrastructure is succeeded
-  retries: 1
+  retries: 2
   async: "{{ 2 * 3600 }}"
   poll: 60
   tags:
@@ -149,7 +149,7 @@
     ANSIBLE_STDOUT_CALLBACK: "debug"
   register: aio_setup_openstack
   until: aio_setup_openstack is succeeded
-  retries: 1
+  retries: 2
   async: "{{ 2 * 3600 }}"
   poll: 60
   tags:

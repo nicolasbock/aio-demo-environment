@@ -35,6 +35,7 @@
 - name: Bootstrap ansible
   become: yes
   shell: |
+    set -o pipefail &&
     ./scripts/bootstrap-ansible.sh 2>&1 | tee /var/log/bootstrap-ansible.output
   args:
     chdir: "{{ osa_repodir }}"
@@ -50,6 +51,7 @@
 - name: Bootstrap AIO
   become: yes
   shell: |
+    set -o pipefail
     ./scripts/bootstrap-aio.sh 2>&1 | tee /var/log/bootstrap-aio.output
   args:
     chdir: "{{ osa_repodir }}"
@@ -97,6 +99,7 @@
 - name: AIO setup-hosts
   become: yes
   shell: |
+    set -o pipefail
     openstack-ansible setup-hosts.yml 2>&1 | tee /var/log/setup-hosts.output
   args:
     chdir: "{{ osa_repodir }}/playbooks"
@@ -116,6 +119,7 @@
 - name: AIO setup-infrastructure
   become: yes
   shell: |
+    set -o pipefail
     openstack-ansible setup-infrastructure.yml 2>&1 | tee /var/log/setup-infrastructure.output
   args:
     chdir: "{{ osa_repodir }}/playbooks"
@@ -135,6 +139,7 @@
 - name: AIO setup-openstack
   become: yes
   shell: |
+    set -o pipefail
     openstack-ansible setup-openstack.yml 2>&1 | tee /var/log/setup-openstack.output
   args:
     chdir: "{{ osa_repodir }}/playbooks"

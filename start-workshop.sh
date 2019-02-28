@@ -14,9 +14,10 @@ containers=(
 )
 
 show_containers=(
-  "utility"
   "neutron"
   "repo"
+  "rsyslog"
+  "utility"
 )
 
 if ! tmux list-sessions -F '#{session_name}' 2>&1 | grep --quiet workshop; then

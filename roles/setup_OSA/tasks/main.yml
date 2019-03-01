@@ -12,7 +12,7 @@
   tags:
     - always
 
-- name: Clone openstack-ansible repository
+- name: "Clone openstack-ansible repository ({{ osa_tag }})"
   become: yes
   git:
     clone: yes

@@ -48,6 +48,30 @@
     - setup_osa
     - bootstrap_ansible
 
+- name: Ensure /etc/openstack_deploy is present
+  become: yes
+  file:
+    path: /etc/openstack_deploy
+    mode: '0755'
+    state: directory
+    owner: root
+    group: root
+
+- name: Update user variables
+  become: yes
+  template:
+    dest: "/etc/openstack_deploy/{{ item }}"
+    src: "{{ item }}.j2"
+  with_items:
+    - user_variables_designate.yml
+    - user_variables_neutron.yml
+    - user_variables_nova.yml
+    - user_variables_octavia.yml
+    - user_variables_workshop.yml
+  tags:
+    - setup_osa
+    - user_variables
+
 - name: "Bootstrap AIO (SCENARIO {{ osa_scenario }})"
   become: yes
   shell: |
@@ -67,21 +91,6 @@
   tags:
     - setup_osa
     - bootstrap_aio
-
-- name: Update user variables
-  become: yes
-  template:
-    dest: "/etc/openstack_deploy/{{ item }}"
-    src: "{{ item }}.j2"
-  with_items:
-    - user_variables_designate.yml
-    - user_variables_neutron.yml
-    - user_variables_nova.yml
-    - user_variables_octavia.yml
-    - user_variables_workshop.yml
-  tags:
-    - setup_osa
-    - user_variables
 
 - name: Add services
   become: yes

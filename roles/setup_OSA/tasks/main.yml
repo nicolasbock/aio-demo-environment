@@ -12,7 +12,7 @@
   tags:
     - always
 
-- name: "Clone openstack-ansible repository ({{ osa_tag }})"
+- name: "Clone openstack-ansible repository (at tag {{ osa_tag }})"
   become: yes
   git:
     clone: yes
@@ -48,7 +48,7 @@
     - setup_osa
     - bootstrap_ansible
 
-- name: "Bootstrap AIO (SCENARIO {{ osa_scenario }} )"
+- name: "Bootstrap AIO (SCENARIO {{ osa_scenario }})"
   become: yes
   shell: |
     set -o pipefail

@@ -156,12 +156,6 @@
     - aio_setup
     - aio_setup_openstack
 
-- name: Disable apparmor for haproxy
-  become: yes
-  shell: aa-disable haproxy
-  tags:
-    - aio_postsetup
-
 - name: Make swap persistent
   become: yes
   lineinfile:

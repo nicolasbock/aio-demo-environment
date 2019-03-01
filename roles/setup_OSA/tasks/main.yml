@@ -48,7 +48,7 @@
     - setup_osa
     - bootstrap_ansible
 
-- name: Bootstrap AIO
+- name: "Bootstrap AIO (SCENARIO {{ osa_scenario }} )"
   become: yes
   shell: |
     set -o pipefail
@@ -58,7 +58,7 @@
     executable: /bin/bash
   environment:
     PATH: "/usr/local/bin:{{ lookup('env', 'PATH') }}"
-    SCENARIO: "octavia"
+    SCENARIO: "{{ osa_scenario }}"
   register: bootstrap_aio
   until: bootstrap_aio is succeeded
   retries: 1

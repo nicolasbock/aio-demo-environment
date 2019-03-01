@@ -29,6 +29,8 @@ key_name: nbock
 # osa_tag: workshop_beginner
 osa_tag: workshop_advanced
 
+osa_scenario: "octavia"
+
 osa_services:
   - cinder
   - designate

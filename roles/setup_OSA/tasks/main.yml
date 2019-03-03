@@ -160,10 +160,24 @@
   tags:
     - aio_setup_openstack
 
-- name: Make swap persistent
+- name: Create OSA configuration playbook
   become: yes
-  lineinfile:
-    path: /etc/fstab
-    line: /openstack/swap.img none swap sw 0 0
+  copy:
+    src: osa-workshop-configuration.yml
+    dest: /root/osa-workshop-configuration.yml
+    owner: root
+    group: root
+    mode: '0644'
   tags:
-    - aio_postsetup
+    - aio_configuration
+
+- name: Create OSA configuration variables
+  become: yes
+  template:
+    src: osa-workshop-variables.yml.j2
+    dest: /root/osa-workshop-variables.yml
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - aio_configuration

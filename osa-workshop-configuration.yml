@@ -1,0 +1,44 @@
+---
+
+- name: Make swap persistent
+  become: yes
+  lineinfile:
+    path: /etc/fstab
+    line: /openstack/swap.img none swap sw 0 0
+  tags:
+    - aio_postsetup
+
+- name: Get cloud secrets
+  become: yes
+  shell: grep "{{ item }}" /etc/openstack_deploy/user_secrets.yml | cut -d ' ' -f 2
+  register: cloud_secrets_output
+  with_items:
+    - keystone_auth_admin_password
+    - octavia_service_password
+  tags:
+    - container_setup
+    - utility_setup
+
+- debug:
+    var: cloud_secrets_output
+  tags:
+    - container_setup
+    - utility_setup
+
+- name: Register cloud secrets
+  set_fact:
+    cloud_secrets: "{{ cloud_secrets | default({}) | combine({item.item: item.stdout}) }}"
+  with_items:
+    - "{{ cloud_secrets_output.results }}"
+  tags:
+    - container_setup
+    - utility_setup
+
+- name: Create clouds.yml
+  become: yes
+  template:
+    src: clouds.yml.j2
+    dest: /root/clouds.yml
+  tags:
+    - container_setup
+    - utility_setup

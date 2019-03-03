@@ -1,0 +1,39 @@
+---
+
+clouds:
+  admin:
+    auth:
+      auth_url: http://172.29.236.100:5000/v3
+      project_name: admin
+      tenant_name: admin
+      username: admin
+      password: {{ cloud_secrets["keystone_auth_admin_password"] }}
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: RegionOne
+    interface: internal
+    identity_api_version: "3"
+  octavia:
+    auth:
+      auth_url: http://172.29.236.100:5000/v3
+      project_name: service
+      tenant_name: service
+      username: octavia
+      password: {{ cloud_secrets["octavia_service_password"] }}
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: RegionOne
+    interface: internal
+    identity_api_version: "3"
+  demo:
+    auth:
+      auth_url: http://172.29.236.100:5000/v3
+      project_name: demo
+      tenant_name: demo
+      username: demo
+      password: demo
+      user_domain_name: Default
+      project_domain_name: Default
+    region_name: RegionOne
+    interface: internal
+    identity_api_version: "3"

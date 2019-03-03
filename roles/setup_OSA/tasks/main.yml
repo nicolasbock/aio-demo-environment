@@ -22,7 +22,7 @@
     force: yes
     version: "{{ osa_tag }}"
   tags:
-    - setup_osa
+    - clone_osa_repo
 
 - name: Reset and clean openstack-ansible repository so we can apply the patches
   become: yes
@@ -30,7 +30,7 @@
   args:
     chdir: "{{ osa_repodir }}"
   tags:
-    - setup_osa
+    - clone_osa_repo
 
 - name: Bootstrap ansible
   become: yes
@@ -45,7 +45,6 @@
   async: 1200
   poll: 10
   tags:
-    - setup_osa
     - bootstrap_ansible
 
 - name: Ensure /etc/openstack_deploy is present
@@ -56,6 +55,8 @@
     state: directory
     owner: root
     group: root
+  tags:
+    - osa_user_variables
 
 - name: Update user variables
   become: yes
@@ -69,8 +70,7 @@
     - user_variables_octavia.yml
     - user_variables_workshop.yml
   tags:
-    - setup_osa
-    - user_variables
+    - osa_user_variables
 
 - name: "Bootstrap AIO (SCENARIO {{ osa_scenario }})"
   become: yes
@@ -89,7 +89,6 @@
   async: 1200
   poll: 10
   tags:
-    - setup_osa
     - bootstrap_aio
 
 - name: Add services
@@ -102,7 +101,6 @@
     creates: "/etc/openstack_deploy/conf.d/{{ item }}.yml"
   with_items: "{{ osa_services }}"
   tags:
-    - setup_osa
     - osa_services
 
 - name: Run setup-hosts playbook
@@ -122,7 +120,6 @@
   async: "{{ 2 * 3600 }}"
   poll: 60
   tags:
-    - aio_setup
     - aio_setup_hosts
 
 - name: Run setup-infrastructure playbook
@@ -142,7 +139,6 @@
   async: "{{ 2 * 3600 }}"
   poll: 60
   tags:
-    - aio_setup
     - aio_setup_infrastructure
 
 - name: Run setup-openstack playbook
@@ -162,7 +158,6 @@
   async: "{{ 2 * 3600 }}"
   poll: 60
   tags:
-    - aio_setup
     - aio_setup_openstack
 
 - name: Make swap persistent

@@ -180,6 +180,7 @@
     - aio_configuration
 
 - name: Copy additional files
+  become: yes
   template:
     src: "{{ item }}.j2"
     dest: "/root/{{ item }}"
@@ -187,7 +188,7 @@
     owner: root
     mode: '0644'
   with_items:
-    - osa-workshop-variables.yml.j2
+    - osa-workshop-variables.yml
     - openrc
   tags:
     - aio_configuration

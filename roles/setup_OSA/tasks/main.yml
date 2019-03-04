@@ -160,6 +160,12 @@
   tags:
     - aio_setup_openstack
 
+- name: Copy log cleanup script
+  copy:
+    src: clean-logs.sh
+    dest: /home/opensuse/clean-logs.sh
+    mode: '0755'
+
 - name: Create OSA configuration playbook
   become: yes
   copy:
@@ -171,13 +177,13 @@
   tags:
     - aio_configuration
 
-- name: Create OSA configuration variables
-  become: yes
+- name: Copy additional files
   template:
-    src: osa-workshop-variables.yml.j2
-    dest: /root/osa-workshop-variables.yml
+    src: "{{ item }}.j2"
+    dest: "/root/{{ item }}"
+    user: root
     owner: root
-    group: root
     mode: '0644'
-  tags:
-    - aio_configuration
+  with_items:
+    - osa-workshop-variables.yml.j2
+    - openrc

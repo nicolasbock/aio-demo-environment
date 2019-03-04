@@ -1,44 +1,202 @@
----
+        ---
 
-- name: Make swap persistent
-  become: yes
-  lineinfile:
-    path: /etc/fstab
-    line: /openstack/swap.img none swap sw 0 0
-  tags:
-    - aio_postsetup
+- name: Load workshop variables
+  hosts: localhost
+  tasks:
 
-- name: Get cloud secrets
-  become: yes
-  shell: grep "{{ item }}" /etc/openstack_deploy/user_secrets.yml | cut -d ' ' -f 2
-  register: cloud_secrets_output
-  with_items:
-    - keystone_auth_admin_password
-    - octavia_service_password
-  tags:
-    - container_setup
-    - utility_setup
+    - name: Local variables
+      include_vars:
+        file: osa-workshop-variables.yml
+      tags:
+        - always
 
-- debug:
-    var: cloud_secrets_output
-  tags:
-    - container_setup
-    - utility_setup
+- name: Configure workshop
+  hosts: localhost
+  tasks:
 
-- name: Register cloud secrets
-  set_fact:
-    cloud_secrets: "{{ cloud_secrets | default({}) | combine({item.item: item.stdout}) }}"
-  with_items:
-    - "{{ cloud_secrets_output.results }}"
-  tags:
-    - container_setup
-    - utility_setup
+    - name: Make swap persistent
+      become: yes
+      lineinfile:
+        path: /etc/fstab
+        line: /openstack/swap.img none swap sw 0 0
 
-- name: Create clouds.yml
-  become: yes
-  template:
-    src: clouds.yml.j2
-    dest: /root/clouds.yml
-  tags:
-    - container_setup
-    - utility_setup
+    - name: Get cloud secrets
+      become: yes
+      shell: grep "{{ item }}" /etc/openstack_deploy/user_secrets.yml | cut -d ' ' -f 2
+      register: cloud_secrets_output
+      with_items:
+        - keystone_auth_admin_password
+        - octavia_service_password
+
+    - debug:
+        var: cloud_secrets_output
+
+    - name: Register cloud secrets
+      set_fact:
+        cloud_secrets: "{{ cloud_secrets | default({}) | combine({item.item: item.stdout}) }}"
+      with_items:
+        - "{{ cloud_secrets_output.results }}"
+
+    - name: Find utility container name
+      become: yes
+      shell: set -o pipefail && lxc-ls -f | grep utility | cut --delimiter " " --fields 1
+      register: "utility_container_name_output"
+
+    - name: Register utility container name
+      set_fact:
+        utility_container_name: "{{ utility_container_name_output.stdout }}"
+
+    - name: Find rsyslog container name
+      become: yes
+      shell: set -o pipefail && lxc-ls -f | grep rsyslog | cut --delimiter " " --fields 1
+      register: "rsyslog_container_name_output"
+
+    - name: Register rsyslog container name
+      set_fact:
+        rsyslog_container_name: "{{ rsyslog_container_name_output.stdout }}"
+
+    - name: Add utility container to inventory
+      add_host:
+        groups: utility_containers
+        name: "{{ utility_container_name }}"
+        ansible_ssh_common_args: "-q -o StrictHostKeyChecking=no -o ProxyJump=opensuse@{{ inventory_hostname }}"
+
+    - name: Add rsyslog container to inventory
+      add_host:
+        groups: rsyslog_containers
+        name: "{{ rsyslog_container_name }}"
+        ansible_ssh_common_args: "-q -o StrictHostKeyChecking=no -o ProxyJump=opensuse@{{ inventory_hostname }}"
+
+- hosts: utility_containers
+  gather_facts: no
+  remote_user: root
+  vars:
+    cloud_secrets: "{{ hostvars[groups['ungrouped'][0]]['cloud_secrets'] }}"
+  tasks:
+
+  - name: Install Python openstacksdk in utility container
+    delegate_to: localhost
+    zypper:
+      name: python-openstacksdk
+    async: 300
+    poll: 10
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Create openrc for demo user in utility container
+    template:
+      src: openrc.j2
+      dest: "/root/{{ item.username }}-openrc"
+    with_items:
+      - username: demo
+        password: demo
+        project: demo
+        tenant: demo
+      - username: octavia
+        password: "{{ cloud_secrets['octavia_service_password'] }}"
+        project: service
+        tenant: service
+    tags:
+      - container_setup
+      - utility_setup
+
+  # Role assign demo user
+
+  - name: Create clouds.yml
+    template:
+      src: clouds.yml.j2
+      dest: /root/clouds.yml
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Check for existing keypair
+    command: test -f /root/.ssh/id_rsa
+    register: keypair_output
+    ignore_errors: yes
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Create keypair
+    command: ssh-keygen -q -t rsa -f /root/.ssh/id_rsa -C "" -N ""
+    when: keypair_output is failed
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Check for OpenStack keypair for octavia
+    shell: openstack --os-cloud octavia keypair list | grep workshop
+    register: keypair_output
+    ignore_errors: yes
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Create OpenStack keypair for octavia
+    command: openstack --os-cloud octavia keypair create --public-key .ssh/id_rsa.pub workshop
+    when: keypair_output is failed
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Check for existing ping/ssh security group
+    command: openstack --os-cloud admin security group show ping/ssh
+    register: security_group_output
+    ignore_errors: yes
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Create ping/ssh security group
+    command: openstack --os-cloud admin security group create ping/ssh
+    when: security_group_output is failed
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Check for ICMP rule
+    shell: openstack --os-cloud admin security group rule list --column "IP Protocol" --format value ping/ssh | grep -i icmp
+    register: rule_output
+    ignore_errors: yes
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Allow ICMP in security group
+    command: openstack --os-cloud admin security group rule create --protocol icmp --ingress ping/ssh
+    when: rule_output is failed
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Check for ssh rule
+    shell: openstack --os-cloud admin security group rule list --column "IP Protocol" --column "Port Range" --format value ping/ssh | grep 22:22
+    register: ssh_rule_output
+    ignore_errors: yes
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Allow ssh in security group
+    command: openstack --os-cloud admin security group rule create --protocol tcp --dst-port 22 --ingress ping/ssh
+    when: ssh_rule_output is failed
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Check for m1.tiny flavor
+    shell: openstack --os-cloud admin flavor list | grep m1.tiny
+    register: flavor_output
+    ignore_errors: yes
+    tags:
+      - container_setup
+      - utility_setup
+
+  - name: Create m1.tiny flavor
+    command: openstack --os-cloud admin flavor create --ram 256 --public m1.tiny
+    when: flavor_output is failed
+    tags:
+      - container_setup
+      - utility_setup

@@ -59,13 +59,11 @@
       add_host:
         groups: utility_containers
         name: "{{ utility_container_name }}"
-        ansible_ssh_common_args: "-q -o StrictHostKeyChecking=no -o ProxyJump=opensuse@{{ inventory_hostname }}"
 
     - name: Add rsyslog container to inventory
       add_host:
         groups: rsyslog_containers
         name: "{{ rsyslog_container_name }}"
-        ansible_ssh_common_args: "-q -o StrictHostKeyChecking=no -o ProxyJump=opensuse@{{ inventory_hostname }}"
 
 - hosts: utility_containers
   gather_facts: no

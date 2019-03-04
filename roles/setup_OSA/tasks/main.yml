@@ -165,6 +165,8 @@
     src: clean-logs.sh
     dest: /home/opensuse/clean-logs.sh
     mode: '0755'
+  tags:
+    - aio_configuration
 
 - name: Create OSA configuration playbook
   become: yes
@@ -187,3 +189,5 @@
   with_items:
     - osa-workshop-variables.yml.j2
     - openrc
+  tags:
+    - aio_configuration

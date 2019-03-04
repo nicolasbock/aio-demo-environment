@@ -179,16 +179,24 @@
   tags:
     - aio_configuration
 
-- name: Copy additional files
+- name: Create OSA configuration variables
   become: yes
   template:
-    src: "{{ item }}.j2"
-    dest: "/root/{{ item }}"
+    src: osa-workshop-variables.yml.j2
+    dest: /root/osa-workshop-variables.yml
     user: root
     owner: root
     mode: '0644'
-  with_items:
-    - osa-workshop-variables.yml
-    - openrc
+  tags:
+    - aio_configuration
+
+- name: Copy openrc template
+  become: yes
+  copy:
+    src: openrc.j2
+    dest: /root/openrc.j2
+    owner: root
+    group: root
+    mode: '0644'
   tags:
     - aio_configuration

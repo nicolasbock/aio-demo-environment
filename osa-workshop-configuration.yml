@@ -65,6 +65,22 @@
         groups: rsyslog_containers
         name: "{{ rsyslog_container_name }}"
 
+- hosts: rsyslog_containers
+  gather_facts: no
+  remote_user: root
+  tasks:
+
+    - name: Install log cleaner script
+      copy:
+        src: clean-logs.sh
+        dest: /root/clean-logs.sh
+        owner: root
+        group: root
+        mode: '0755'
+      tags:
+        - container_setup
+        - rsyslog_setup
+
 - hosts: utility_containers
   gather_facts: no
   remote_user: root

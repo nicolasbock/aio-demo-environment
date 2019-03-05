@@ -161,9 +161,12 @@
     - aio_setup_openstack
 
 - name: Copy log cleanup script
+  become: yes
   copy:
     src: clean-logs.sh
-    dest: /home/opensuse/clean-logs.sh
+    dest: /root/clean-logs.sh
+    owner: root
+    group: root
     mode: '0755'
   tags:
     - aio_configuration

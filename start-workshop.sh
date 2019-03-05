@@ -14,6 +14,7 @@ containers=(
 )
 
 show_containers=(
+  "galera"
   "neutron"
   "repo"
   "rsyslog"

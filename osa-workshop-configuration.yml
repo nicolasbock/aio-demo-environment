@@ -15,13 +15,11 @@
   tasks:
 
     - name: Make swap persistent
-      become: yes
       lineinfile:
         path: /etc/fstab
         line: /openstack/swap.img none swap sw 0 0
 
     - name: Get cloud secrets
-      become: yes
       shell: grep "{{ item }}" /etc/openstack_deploy/user_secrets.yml | cut -d ' ' -f 2
       register: cloud_secrets_output
       with_items:
@@ -38,7 +36,6 @@
         - "{{ cloud_secrets_output.results }}"
 
     - name: Find utility container name
-      become: yes
       shell: set -o pipefail && lxc-ls -f | grep utility | cut --delimiter " " --fields 1
       register: "utility_container_name_output"
 
@@ -47,7 +44,6 @@
         utility_container_name: "{{ utility_container_name_output.stdout }}"
 
     - name: Find rsyslog container name
-      become: yes
       shell: set -o pipefail && lxc-ls -f | grep rsyslog | cut --delimiter " " --fields 1
       register: "rsyslog_container_name_output"
 

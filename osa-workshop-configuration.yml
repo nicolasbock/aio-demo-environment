@@ -26,9 +26,6 @@
         - keystone_auth_admin_password
         - octavia_service_password
 
-    - debug:
-        var: cloud_secrets_output
-
     - name: Register cloud secrets
       set_fact:
         cloud_secrets: "{{ cloud_secrets | default({}) | combine({item.item: item.stdout}) }}"

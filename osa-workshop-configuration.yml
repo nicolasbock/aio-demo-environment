@@ -115,8 +115,6 @@
         - container_setup
         - utility_setup
 
-    - debug:
-        msg: "[FIXME] Role assign demo user"
     - name: Create clouds.yml
       template:
         src: clouds.yml.j2
@@ -128,6 +126,16 @@
         - container_setup
         - utility_setup
 
+    - name: Assign Member role to demo user
+      os_user_role:
+        cloud: admin
+        project: demo
+        role: member
+        user: demo
+        verify: no
+      tags:
+        - container_setup
+        - utility_setup
 
     - name: Check for existing keypair
       command: test -f /root/.ssh/id_rsa

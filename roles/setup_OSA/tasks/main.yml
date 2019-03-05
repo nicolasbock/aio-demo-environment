@@ -193,13 +193,16 @@
   tags:
     - aio_configuration
 
-- name: Copy openrc template
+- name: Copy additional templates
   become: yes
   copy:
-    src: openrc.j2
-    dest: /root/openrc.j2
+    src: "{{ item }}"
+    dest: "/root/{{ item }}"
     owner: root
     group: root
     mode: '0644'
+  with_items:
+    - openrc.j2
+    - clouds.yml.j2
   tags:
     - aio_configuration

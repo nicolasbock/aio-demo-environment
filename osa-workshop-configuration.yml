@@ -35,6 +35,14 @@
       with_items:
         - "{{ cloud_secrets_output.results }}"
 
+    - name: Create clouds.yml
+      template:
+        src: clouds.yml.j2
+        dest: /root/clouds.yml
+      tags:
+        - container_setup
+        - utility_setup
+
     - name: Find utility container name
       shell: set -o pipefail && lxc-ls -f | grep utility | cut --delimiter " " --fields 1
       register: "utility_container_name_output"

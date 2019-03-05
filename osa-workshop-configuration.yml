@@ -117,6 +117,17 @@
 
     - debug:
         msg: "[FIXME] Role assign demo user"
+    - name: Create clouds.yml
+      template:
+        src: clouds.yml.j2
+        dest: /root/clouds.yml
+        owner: root
+        group: root
+        mode: '0644'
+      tags:
+        - container_setup
+        - utility_setup
+
 
     - name: Check for existing keypair
       command: test -f /root/.ssh/id_rsa

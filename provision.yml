@@ -68,6 +68,15 @@
         image_type: "{{ image['type'] }}"
         extra_device_name: "{{ extra_device_name | default('undefined') }}"
 
+    - name: Set user password
+      become: yes
+      user:
+        name: "{{ image['user'] }}"
+        password: "{{ user_password | password_hash('sha512') }}"
+      when: user_password is defined
+      tags:
+        - user_password
+
     - name: Add SUSE CA repository
       become: yes
       zypper_repository:

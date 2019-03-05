@@ -31,6 +31,11 @@ osa_tag: workshop_advanced
 
 osa_scenario: "octavia"
 
+# Set a regular user password. Note that this has pretty severe
+# security implications. Anyone with this password can log into the
+# OSA instance and has root access to it.
+# user_password: "some secret"
+
 osa_services:
   - cinder
   - designate

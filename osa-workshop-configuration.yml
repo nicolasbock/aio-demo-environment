@@ -84,129 +84,121 @@
     cloud_secrets: "{{ hostvars['localhost']['cloud_secrets'] }}"
   tasks:
 
-  - name: Install Python openstacksdk in utility container
-    delegate_to: localhost
-    zypper:
-      name: python-openstacksdk
-    async: 300
-    poll: 10
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Install Python openstacksdk in utility container
+      zypper:
+        name: python-openstacksdk
+      async: 300
+      poll: 10
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Create openrc for demo user in utility container
-    template:
-      src: openrc.j2
-      dest: "/root/{{ item.username }}-openrc"
-    with_items:
-      - username: demo
-        password: demo
-        project: demo
-        tenant: demo
-      - username: octavia
-        password: "{{ cloud_secrets['octavia_service_password'] }}"
-        project: service
-        tenant: service
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Create openrc for demo user in utility container
+      template:
+        src: openrc.j2
+        dest: "/root/{{ item.username }}-openrc"
+      with_items:
+        - username: demo
+          password: demo
+          project: demo
+          tenant: demo
+        - username: octavia
+          password: "{{ cloud_secrets['octavia_service_password'] }}"
+          project: service
+          tenant: service
+      tags:
+        - container_setup
+        - utility_setup
 
-  # Role assign demo user
+    - debug:
+        msg: "[FIXME] Role assign demo user"
 
-  - name: Create clouds.yml
-    template:
-      src: clouds.yml.j2
-      dest: /root/clouds.yml
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Check for existing keypair
+      command: test -f /root/.ssh/id_rsa
+      register: keypair_output
+      ignore_errors: yes
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Check for existing keypair
-    command: test -f /root/.ssh/id_rsa
-    register: keypair_output
-    ignore_errors: yes
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Create keypair
+      command: ssh-keygen -q -t rsa -f /root/.ssh/id_rsa -C "" -N ""
+      when: keypair_output is failed
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Create keypair
-    command: ssh-keygen -q -t rsa -f /root/.ssh/id_rsa -C "" -N ""
-    when: keypair_output is failed
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Check for OpenStack keypair for octavia
+      shell: openstack --os-cloud octavia keypair list | grep workshop
+      register: keypair_output
+      ignore_errors: yes
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Check for OpenStack keypair for octavia
-    shell: openstack --os-cloud octavia keypair list | grep workshop
-    register: keypair_output
-    ignore_errors: yes
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Create OpenStack keypair for octavia
+      command: openstack --os-cloud octavia keypair create --public-key .ssh/id_rsa.pub workshop
+      when: keypair_output is failed
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Create OpenStack keypair for octavia
-    command: openstack --os-cloud octavia keypair create --public-key .ssh/id_rsa.pub workshop
-    when: keypair_output is failed
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Check for existing ping/ssh security group
+      command: openstack --os-cloud admin security group show ping/ssh
+      register: security_group_output
+      ignore_errors: yes
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Check for existing ping/ssh security group
-    command: openstack --os-cloud admin security group show ping/ssh
-    register: security_group_output
-    ignore_errors: yes
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Create ping/ssh security group
+      command: openstack --os-cloud admin security group create ping/ssh
+      when: security_group_output is failed
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Create ping/ssh security group
-    command: openstack --os-cloud admin security group create ping/ssh
-    when: security_group_output is failed
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Check for ICMP rule
+      shell: openstack --os-cloud admin security group rule list --column "IP Protocol" --format value ping/ssh | grep -i icmp
+      register: rule_output
+      ignore_errors: yes
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Check for ICMP rule
-    shell: openstack --os-cloud admin security group rule list --column "IP Protocol" --format value ping/ssh | grep -i icmp
-    register: rule_output
-    ignore_errors: yes
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Allow ICMP in security group
+      command: openstack --os-cloud admin security group rule create --protocol icmp --ingress ping/ssh
+      when: rule_output is failed
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Allow ICMP in security group
-    command: openstack --os-cloud admin security group rule create --protocol icmp --ingress ping/ssh
-    when: rule_output is failed
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Check for ssh rule
+      shell: openstack --os-cloud admin security group rule list --column "IP Protocol" --column "Port Range" --format value ping/ssh | grep 22:22
+      register: ssh_rule_output
+      ignore_errors: yes
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Check for ssh rule
-    shell: openstack --os-cloud admin security group rule list --column "IP Protocol" --column "Port Range" --format value ping/ssh | grep 22:22
-    register: ssh_rule_output
-    ignore_errors: yes
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Allow ssh in security group
+      command: openstack --os-cloud admin security group rule create --protocol tcp --dst-port 22 --ingress ping/ssh
+      when: ssh_rule_output is failed
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Allow ssh in security group
-    command: openstack --os-cloud admin security group rule create --protocol tcp --dst-port 22 --ingress ping/ssh
-    when: ssh_rule_output is failed
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Check for m1.tiny flavor
+      shell: openstack --os-cloud admin flavor list | grep m1.tiny
+      register: flavor_output
+      ignore_errors: yes
+      tags:
+        - container_setup
+        - utility_setup
 
-  - name: Check for m1.tiny flavor
-    shell: openstack --os-cloud admin flavor list | grep m1.tiny
-    register: flavor_output
-    ignore_errors: yes
-    tags:
-      - container_setup
-      - utility_setup
-
-  - name: Create m1.tiny flavor
-    command: openstack --os-cloud admin flavor create --ram 256 --public m1.tiny
-    when: flavor_output is failed
-    tags:
-      - container_setup
-      - utility_setup
+    - name: Create m1.tiny flavor
+      command: openstack --os-cloud admin flavor create --ram 256 --public m1.tiny
+      when: flavor_output is failed
+      tags:
+        - container_setup
+        - utility_setup

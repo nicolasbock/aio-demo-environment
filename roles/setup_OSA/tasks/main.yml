@@ -187,8 +187,8 @@
   template:
     src: osa-workshop-variables.yml.j2
     dest: /root/osa-workshop-variables.yml
-    user: root
     owner: root
+    group: root
     mode: '0644'
   tags:
     - aio_configuration

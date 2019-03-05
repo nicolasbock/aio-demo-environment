@@ -81,7 +81,7 @@
   gather_facts: no
   remote_user: root
   vars:
-    cloud_secrets: "{{ hostvars[groups['ungrouped'][0]]['cloud_secrets'] }}"
+    cloud_secrets: "{{ hostvars['localhost']['cloud_secrets'] }}"
   tasks:
 
   - name: Install Python openstacksdk in utility container

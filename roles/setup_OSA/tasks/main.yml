@@ -91,6 +91,58 @@
   tags:
     - bootstrap_aio
 
+- name: Register already deployed services
+  find:
+    paths: /etc/openstack_deploy/conf.d
+    patterns: "*.yml"
+  register:
+    deployed_service_files
+  tags:
+    - osa_services
+
+- name: Get filenames for deployed services that should be removed
+  set_fact:
+    deployed_services_temp: "{{ deployed_service_files['files'] | map(attribute='path') | map('basename') | map('splitext') | list }}"
+  tags:
+    - osa_services
+
+- name: Consolidate the deployed services list
+  set_fact:
+    deployed_services: "{{ (deployed_services | default([])) + [item[0]] }}"
+  loop: "{{ deployed_services_temp }}"
+  tags:
+    - osa_services
+
+- name: Find services to delete
+  set_fact:
+    extraneous_services: "{{ deployed_services | difference(osa_services) }}"
+  tags:
+    - osa_services
+
+- debug:
+    var: deployed_services
+  tags:
+    - osa_services
+
+- debug:
+    var: osa_services
+  tags:
+    - osa_services
+
+- debug:
+    var: extraneous_services
+  tags:
+    - osa_services
+
+- name: Remove extraneous services
+  become: yes
+  file:
+    path: "/etc/openstack_deploy/conf.d/{{ item }}.yml"
+    state: absent
+  loop: "{{ extraneous_services }}"
+  tags:
+    - osa_services
+
 - name: Add services
   become: yes
   shell: |
@@ -99,7 +151,7 @@
       "/etc/openstack_deploy/conf.d/{{ item }}.yml"
   args:
     creates: "/etc/openstack_deploy/conf.d/{{ item }}.yml"
-  with_items: "{{ osa_services }}"
+  loop: "{{ osa_services }}"
   tags:
     - osa_services
 

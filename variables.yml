@@ -36,6 +36,7 @@ osa_scenario: "octavia"
 # OSA instance and has root access to it.
 # user_password: "some secret"
 
+# The list of services to deploy.
 osa_services:
   - cinder
   - designate

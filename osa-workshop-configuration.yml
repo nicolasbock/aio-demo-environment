@@ -98,6 +98,15 @@
         - container_setup
         - utility_setup
 
+    - name: Copy bashrc
+      copy:
+        src: /root/.bashrc
+        dest: /root/.bashrc
+        mode: '0644'
+      tags:
+        - container_setup
+        - utility_setup
+
     - name: Create openrc for demo user in utility container
       template:
         src: openrc.j2

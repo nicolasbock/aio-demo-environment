@@ -120,6 +120,10 @@
           password: "{{ cloud_secrets['octavia_service_password'] }}"
           project: service
           tenant: service
+        - username: admin
+          password: "{{ cloud_secrets['keystone_auth_admin_password'] }}"
+          project: admin
+          tenant: admin
       tags:
         - container_setup
         - utility_setup

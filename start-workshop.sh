@@ -23,7 +23,7 @@ show_containers=(
 
 if ! tmux list-sessions -F '#{session_name}' 2>&1 | grep --quiet workshop; then
   tmux start-server
-  tmux new-session -d -s workshop -n host
+  tmux new-session -d -s workshop -n host sudo su -
   tmux set-option -t workshop -g -w allow-rename off
   tmux set-option -t workshop -g history-limit 100000
   for c in ${containers[@]}; do

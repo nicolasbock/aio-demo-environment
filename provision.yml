@@ -72,7 +72,7 @@
       become: yes
       user:
         name: "{{ image['user'] }}"
-        password: "{{ user_password | password_hash('sha512') }}"
+        password: "{{ user_password | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string) }}"
       when: user_password is defined
       tags:
         - user_password

@@ -24,14 +24,6 @@
   tags:
     - clone_osa_repo
 
-- name: Reset and clean openstack-ansible repository so we can apply the patches
-  become: yes
-  shell: git reset --hard && git clean -dfx
-  args:
-    chdir: "{{ osa_repodir }}"
-  tags:
-    - clone_osa_repo
-
 - name: Bootstrap ansible
   become: yes
   shell: |

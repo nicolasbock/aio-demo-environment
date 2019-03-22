@@ -5,21 +5,21 @@ ARDANA_SITE: provo
 susedownload: ibs-mirror.prv.suse.net
 
 images:
-  SP3:
+  SLE_12_SP3:
     image: SLES12-SP3-JeOS.x86_64
     user: root
     type: SUSE
-  SP4:
+  SLE_12_SP4:
     image: SLES12-SP4-JeOS.x86_64-12.4
     user: sles
     type: SUSE
-  Leap_42.3:
+  openSUSE_Leap_42.3:
     image: openSUSE-Leap-42.3-OpenStack.x86_64
     user: opensuse
     type: SUSE
-  Leap_15.0:
-    image: openSUSE-Leap-15.0-OpenStack.x86_64
-    user: root
+  openSUSE-Leap_15.0:
+    image: openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.131
+    user: opensuse
     type: SUSE
   Xenial:
     image: 4d6a9155-e626-4f03-a0bd-fd92e79575f6

@@ -1,0 +1,11 @@
+---
+
+- name: Run gate job
+  become: yes
+  shell: |
+    set -o pipefail &&
+    ./scripts/gate-check-commit.sh {{ osa_scenario }} {{ osa_action }} {{ osa_install_method }} 2>&1 | tee --append /var/log/gate-check.output
+  args:
+    chdir: "{{ osa_repodir }}"
+  tags:
+    - setup_osa

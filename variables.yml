@@ -31,6 +31,9 @@ osa_tag: workshop_advanced
 
 osa_scenario: "octavia"
 
+# osa_job: "upstream"
+osa_job: "workshop"
+
 # Set a regular user password. Note that this has pretty severe
 # security implications. Anyone with this password can log into the
 # OSA instance and has root access to it.

@@ -3,8 +3,9 @@
 - name: Run gate job
   become: yes
   shell: |
-    set -o pipefail &&
-    ./scripts/gate-check-commit.sh {{ osa_scenario }} {{ osa_action }} {{ osa_install_method }} 2>&1 | tee --append /var/log/gate-check.output
+    tmux -vv new-session -d -s upstream-gate; \
+    tmux -vv send-keys "./scripts/gate-check-commit.sh
+      {{ osa_scenario }} {{ osa_action }} {{ osa_install_method }}" Enter
   args:
     chdir: "{{ osa_repodir }}"
   tags:

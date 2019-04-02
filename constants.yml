@@ -17,7 +17,7 @@ images:
     image: openSUSE-Leap-42.3-OpenStack.x86_64
     user: opensuse
     type: SUSE
-  openSUSE-Leap_15.0:
+  openSUSE_Leap_15.0:
     image: openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.131
     user: opensuse
     type: SUSE

@@ -232,27 +232,6 @@
           - destdir: /home/opensuse
             owner: opensuse
 
-    - name: Copy workshop files
-      become: yes
-      copy:
-        src: "{{ item[0].src }}"
-        dest: "{{ item[1].destdir }}/{{ item[0].dest }}"
-        owner: "{{ item[1].owner }}"
-        mode: "{{ item[0].mode }}"
-      tags:
-        - workshop_scripts
-      with_nested:
-        -
-          - src: start-workshop.sh
-            dest: start-workshop.sh
-            mode: '0755'
-        -
-          - destdir: /root
-            owner: root
-          - destdir: /home/opensuse
-            owner: opensuse
-      when: deployment_target == "OSA"
-
     - name: Configure bash
       become: yes
       template:

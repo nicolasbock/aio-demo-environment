@@ -80,7 +80,7 @@
     - name: Add SUSE CA repository
       become: yes
       zypper_repository:
-        repo: http://download.suse.de/ibs/SUSE:/CA/openSUSE_Leap_42.3/
+        repo: "http://download.suse.de/ibs/SUSE:/CA/{{ distro }}/"
         name: SUSE_CA
         auto_import_keys: yes
         runrefresh: yes
@@ -89,7 +89,7 @@
     - name: Add SUSE server:http repository
       become: yes
       zypper_repository:
-        repo: https://download.opensuse.org/repositories/server:http/openSUSE_Leap_42.3
+        repo: "https://download.opensuse.org/repositories/server:/http/{{ distro }}"
         name: server_http
       when: image_type == "SUSE"
 

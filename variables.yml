@@ -10,7 +10,7 @@ name_prefix: nbock-osa
 # name_prefix: nbock-osa-manual-deployer
 
 # distro: Xenial
-distro: Leap_42.3
+distro: openSUSE_Leap_15.0
 
 image: "{{ images[distro] }}"
 network_name: "{{ name_prefix }}-net"

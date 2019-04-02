@@ -160,6 +160,7 @@
         name:
           - ca-certificates-suse
           - emacs-el
+          - git-core
           - libguestfs
           - libvirt
           - libvirt-python

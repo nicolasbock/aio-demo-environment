@@ -101,6 +101,12 @@
         runrefresh: yes
       when: image_type == "SUSE"
 
+    - name: Update apt-cache
+      become: yes
+      apt:
+        update_cache: yes
+      when: image_type == "Ubuntu"
+
     - name: Configure kvm-intel module
       become: yes
       blockinfile:

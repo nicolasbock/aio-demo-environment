@@ -1,0 +1,99 @@
+---
+
+- name: Fix lock files
+  hosts: all
+  vars:
+    ansible_host: 192.168.100.200
+    ansible_ssh_common_args: "-q -o StrictHostKeyChecking=no -o ProxyJump=opensuse@{{ inventory_hostname }}"
+  remote_user: opensuse
+  tasks:
+
+    - name: Fix lock files
+      become: yes
+      file:
+        path: "/var/lock/{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+      with_items:
+        - owner: cinder
+          group: cinder
+          path: cinder-backup
+        - owner: cinder
+          group: cinder
+          path: cinder-volume
+        - owner: cinder
+          group: cinder
+          path: cinder-volume-usage-audit
+        - owner: neutron
+          group: neutron
+          path: neutron
+        - owner: neutron
+          group: neutron
+          path: neutron-dhcp-agent
+        - owner: neutron
+          group: neutron
+          path: neutron-l3-agent
+        - owner: neutron
+          group: neutron
+          path: neutron-linuxbridge-agent
+        - owner: neutron
+          group: neutron
+          path: neutron-metadata-agent
+        - owner: neutron
+          group: neutron
+          path: neutron-metering-agent
+        - owner: nova
+          group: nova
+          path: nova
+        - owner: nova
+          group: nova
+          path: nova-compute
+        - owner: swift
+          group: swift
+          path: swift-account-auditor
+        - owner: swift
+          group: swift
+          path: swift-account-reaper
+        - owner: swift
+          group: swift
+          path: swift-account-replicator
+        - owner: swift
+          group: swift
+          path: swift-account-server
+        - owner: swift
+          group: swift
+          path: swift-container-auditor
+        - owner: swift
+          group: swift
+          path: swift-container-reconciler
+        - owner: swift
+          group: swift
+          path: swift-container-replicator
+        - owner: swift
+          group: swift
+          path: swift-container-server
+        - owner: swift
+          group: swift
+          path: swift-container-sync
+        - owner: swift
+          group: swift
+          path: swift-container-updater
+        - owner: swift
+          group: swift
+          path: swift-object-auditor
+        - owner: swift
+          group: swift
+          path: swift-object-expirer
+        - owner: swift
+          group: swift
+          path: swift-object-reconstructor
+        - owner: swift
+          group: swift
+          path: swift-object-replicator
+        - owner: swift
+          group: swift
+          path: swift-object-server
+        - owner: swift
+          group: swift
+          path: swift-object-updater

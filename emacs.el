@@ -19,7 +19,23 @@
   (package-install 'use-package))
 (require 'use-package)
 
-(setq frame-background-mode 'dark)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(delete-selection-mode nil)
+ '(frame-background-mode (quote dark))
+ '(global-visual-line-mode t)
+ '(package-selected-packages (quote (jinja2-mode yaml-mode use-package)))
+ '(save-place-mode t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 
 (use-package yaml-mode
   :ensure t

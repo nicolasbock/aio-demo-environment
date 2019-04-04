@@ -237,8 +237,8 @@
         -
           - destdir: /root
             owner: root
-          - destdir: /home/opensuse
-            owner: opensuse
+          - destdir: "/home/{{ image['user'] }}"
+            owner: "{{ image['user'] }}"
 
     - name: Configure bash
       become: yes
@@ -251,8 +251,8 @@
       with_items:
         - dest: /root
           owner: root
-        - dest: /home/opensuse
-          owner: opensuse
+        - dest: "/home/{{ image['user'] }}"
+          owner: "{{ image['user'] }}"
 
     - name: Start services
       become: yes

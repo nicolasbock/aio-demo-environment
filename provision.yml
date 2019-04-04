@@ -212,6 +212,7 @@
       user:
         name: opensuse
         shell: /bin/bash
+      when: image_type == "SUSE"
 
     - name: Copy configuration files
       become: yes

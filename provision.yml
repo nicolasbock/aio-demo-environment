@@ -185,6 +185,28 @@
       tags:
         - packages
 
+    - name: Do a full package update
+      become: yes
+      zypper:
+        name: "*"
+        state: dist-upgrade
+      when: image_type == "SUSE"
+      tags:
+        - packages
+
+    - name: Do a full package update
+      become: yes
+      apt:
+        upgrade: dist
+      when: image_type == "Ubuntu"
+      tags:
+        - packages
+
+    - name: Reboot machine
+      become: yes
+      reboot:
+        reboot_timeout: 3600
+
     - name: Fix lvm filter rules
       become: yes
       vars:

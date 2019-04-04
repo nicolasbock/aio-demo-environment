@@ -1,12 +1,11 @@
 ---
 
 - name: Run gate job
-  become: yes
   shell: |
-    tmux -vv new-session -d -s upstream-gate; \
-    tmux -vv send-keys "./scripts/gate-check-commit.sh
+    tmux new-session -d -s upstream-gate
+    tmux send-keys "sudo su -" Enter
+    tmux send-keys "cd {{ osa_repodir }}" Enter
+    tmux send-keys "./scripts/gate-check-commit.sh \
       {{ osa_scenario }} {{ osa_action }} {{ osa_install_method }}" Enter
-  args:
-    chdir: "{{ osa_repodir }}"
   tags:
     - setup_osa

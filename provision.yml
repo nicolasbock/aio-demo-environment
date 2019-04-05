@@ -250,6 +250,9 @@
           - src: emacs.el
             dest: .emacs
             mode: '0644'
+          - src: vimrc
+            dest: .vimrc
+            mode: '0644'
           - src: screenrc
             dest: .screenrc
             mode: '0644'

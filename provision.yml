@@ -179,7 +179,17 @@
           - libguestfs
           - libvirt
           - libvirt-python
+          - python-devel
           - vim-data
+      when: image_type == "SUSE"
+      tags:
+        - packages
+
+    - name: Install devel package for SUSE
+      become: yes
+      zypper:
+        name: devel_basis
+        type: pattern
       when: image_type == "SUSE"
       tags:
         - packages

@@ -93,6 +93,15 @@
         name: server_http
       when: image_type == "SUSE"
 
+    - name: Add vendors to zypper
+      become: yes
+      copy:
+        content: |
+          [main]
+          vendors = openSUSE,obs://build.opensuse.org/devel:languages:python
+        dest: /etc/zypp/vendors.d/osa.vendors
+      when: image_type == "SUSE"
+
     - name: Refresh Zypper repositories
       become: yes
       zypper_repository:

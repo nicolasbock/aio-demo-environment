@@ -217,6 +217,7 @@
       become: yes
       apt:
         upgrade: dist
+      register: full_package_update
       when: image_type == "Ubuntu"
       tags:
         - packages
@@ -225,6 +226,7 @@
       become: yes
       reboot:
         reboot_timeout: 3600
+      when: full_package_update.changed
 
     - name: Fix lvm filter rules
       become: yes

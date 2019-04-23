@@ -14,11 +14,11 @@ images:
     user: sles
     type: SUSE
   openSUSE_Leap_42.3:
-    image: openSUSE-Leap-42.3-OpenStack.x86_64
+    image: openSUSE-Leap-42.3-OpenStack.x86_64-0.0.4-Build7.226
     user: opensuse
     type: SUSE
   openSUSE_Leap_15.0:
-    image: openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.131
+    image: openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.145
     user: opensuse
     type: SUSE
   Xenial:

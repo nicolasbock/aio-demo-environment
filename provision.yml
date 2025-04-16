@@ -29,6 +29,13 @@
       tags:
         - provision_server
 
+    - name: Provision libvirt based server
+      include_role:
+        name: provision_libvirt
+      when: provision_type == "libvirt"
+      tags:
+        - provision_server
+
 # We need to wait for the server to become available _without_
 # gathering facts. Once it's available we can configure it in a second
 # step.

@@ -18,7 +18,7 @@ images:
     user: opensuse
     type: SUSE
   openSUSE_Leap_15.0:
-    image: openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Buildlp150.12.145
+    image: openSUSE-Leap-15.0-OpenStack.x86_64-0.0.4-Build12.175
     user: opensuse
     type: SUSE
   Xenial:

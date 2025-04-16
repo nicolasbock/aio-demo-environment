@@ -17,8 +17,8 @@
     -
       - destdir: /root
         owner: root
-      - destdir: /home/opensuse
-        owner: opensuse
+      - destdir: "/home/{{ image['user'] }}"
+        owner: "{{ image['user'] }}"
 
 - name: Bootstrap ansible
   become: yes
@@ -209,6 +209,7 @@
     group: root
     mode: '0755'
   tags:
+    - setup_osa
     - aio_configuration
 
 - name: Create OSA configuration playbook
@@ -220,6 +221,7 @@
     group: root
     mode: '0644'
   tags:
+    - setup_osa
     - aio_configuration
 
 - name: Create OSA configuration variables
@@ -231,6 +233,7 @@
     group: root
     mode: '0644'
   tags:
+    - setup_osa
     - aio_configuration
 
 - name: Copy additional templates
@@ -245,4 +248,5 @@
     - openrc.j2
     - clouds.yml.j2
   tags:
+    - setup_osa
     - aio_configuration

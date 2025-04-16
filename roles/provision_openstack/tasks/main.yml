@@ -36,15 +36,20 @@
   os_volume:
     display_name: "{{ server_name }}-volume"
     image: "{{ image['image'] }}"
-    size: 120
+    size: "{{ server_volume_size }}"
   register: boot_volume
+  tags:
+    - create_server
+
+- name: "Flag server volume {{ server_name }}-volume as bootable"
+  shell: openstack volume set --bootable "{{ boot_volume.id }}"
   tags:
     - create_server
 
 - name: "Create extra volume {{ server_name }}-extra"
   os_volume:
     display_name: "{{ server_name }}-extra"
-    size: 120
+    size: "{{ extra_volume_size }}"
   register: extra_volume
   when: deployment_target == "Crowbar"
   tags:

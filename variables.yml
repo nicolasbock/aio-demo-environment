@@ -27,7 +27,8 @@ key_name: nbock
 # osa_tag: master
 # osa_tag: ipv6
 # osa_tag: workshop_beginner
-osa_tag: workshop_advanced
+# osa_tag: workshop_test
+osa_tag: workshop_test_2
 
 osa_scenario: "octavia"
 
@@ -37,7 +38,7 @@ osa_job: "workshop"
 # Set a regular user password. Note that this has pretty severe
 # security implications. Anyone with this password can log into the
 # OSA instance and has root access to it.
-# user_password: "some secret"
+user_password: "To0l-8oX"
 
 # The list of services to deploy.
 osa_services:
@@ -64,3 +65,6 @@ deployment_target: OSA
 
 # want_ipv6: true
 want_ipv6: false
+
+server_volume_size: 100
+extra_volume_size: 100
